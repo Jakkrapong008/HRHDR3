@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -9,10 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* กำหนดฟอนต์ Prompt สำหรับทุกองค์ประกอบ */
         * {
             font-family: 'Prompt', sans-serif;
         }
         
+        /* กำหนดตัวแปรสีสำหรับธีม */
         :root {
             --primary: #ff6b6b;
             --primary-light: #ffb8b8;
@@ -22,69 +22,82 @@
             --gray: #e9ecef;
         }
         
+        /* กำหนดสีพื้นหลังของ body */
         body {
             background-color: var(--light-gray);
         }
         
+        /* สไตล์สำหรับคอนเทนเนอร์ปฏิทิน */
         .calendar-container {
             background-color: var(--white);
             border-radius: 1rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
         
+        /* สไตล์สำหรับส่วนหัวของปฏิทิน */
         .calendar-header {
             background-color: var(--primary);
             color: var(--white);
             border-radius: 1rem 1rem 0 0;
         }
         
+        /* สไตล์สำหรับแต่ละวันในปฏิทิน */
         .calendar-day {
             min-height: 100px;
             transition: all 0.3s ease;
         }
         
+        /* สไตล์เมื่อโฮเวอร์เหนือวันในปฏิทิน */
         .calendar-day:hover {
             background-color: var(--light-gray);
             transform: translateY(-2px);
         }
         
+        /* สไตล์สำหรับวันที่มีกิจกรรม */
         .calendar-day.has-event {
             background-color: var(--primary-light);
             color: var(--primary-dark);
         }
         
+        /* สไตล์สำหรับปุ่มหลัก */
         .btn-primary {
             background-color: var(--primary);
             color: var(--white);
             transition: all 0.3s ease;
         }
         
+        /* สไตล์เมื่อโฮเวอร์เหนือปุ่มหลัก */
         .btn-primary:hover {
             background-color: var(--primary-dark);
             transform: translateY(-2px);
         }
         
+        /* สไตล์สำหรับปุ่มแบบ outline */
         .btn-outline {
             border: 1px solid var(--primary);
             color: var(--primary);
             transition: all 0.3s ease;
         }
         
+        /* สไตล์เมื่อโฮเวอร์เหนือปุ่มแบบ outline */
         .btn-outline:hover {
             background-color: var(--primary-light);
             color: var(--primary-dark);
         }
         
+        /* สไตล์สำหรับรายการกิจกรรม */
         .event-item {
             border-left: 4px solid var(--primary);
             transition: all 0.3s ease;
         }
         
+        /* สไตล์เมื่อโฮเวอร์เหนือรายการกิจกรรม */
         .event-item:hover {
             transform: translateX(5px);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         
+        /* แอนิเมชัน fade-in */
         .fade-in {
             animation: fadeIn 0.5s ease-in-out;
         }
@@ -100,6 +113,7 @@
             }
         }
         
+        /* แอนิเมชัน bounce */
         .bounce {
             animation: bounce 1s infinite alternate;
         }
@@ -113,6 +127,7 @@
             }
         }
         
+        /* แอนิเมชัน pulse */
         .pulse {
             animation: pulse 2s infinite;
         }
@@ -129,11 +144,13 @@
             }
         }
         
+        /* สไตล์สำหรับแท็บที่ active */
         .tab-active {
             background-color: var(--primary);
             color: var(--white);
         }
         
+        /* สไตล์สำหรับ loader */
         .loader {
             border: 4px solid var(--light-gray);
             border-top: 4px solid var(--primary);
@@ -147,11 +164,19 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* สไตล์สำหรับข้อความแสดงข้อผิดพลาด */
+        .error-message {
+            background-color: #ffebeb;
+            color: #d14747;
+            border: 1px solid #ff6b6b;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
     </style>
 </head>
 <body>
     <div class="container mx-auto px-4 py-8 max-w-7xl">
-        <!-- Header -->
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 fade-in">
             <div class="flex items-center mb-4 md:mb-0">
                 <div class="mr-4 pulse">
@@ -174,7 +199,6 @@
             </div>
         </header>
 
-        <!-- View Selector -->
         <div class="bg-white rounded-lg shadow-md p-4 mb-6 fade-in">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="flex space-x-2 mb-4 md:mb-0">
@@ -202,7 +226,6 @@
             </div>
         </div>
 
-        <!-- Search and Filter -->
         <div class="bg-white rounded-lg shadow-md p-4 mb-6 fade-in">
             <h3 class="text-lg font-semibold mb-3">🔍 ค้นหากิจกรรม</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -233,13 +256,16 @@
             </div>
         </div>
 
-        <!-- Loading Indicator -->
         <div id="loadingIndicator" class="flex justify-center items-center py-10 hidden">
             <div class="loader mr-3"></div>
             <p class="text-gray-600">กำลังโหลดข้อมูล...</p>
         </div>
 
-        <!-- Calendar View -->
+        <div id="errorMessage" class="error-message hidden mb-6">
+            <p class="font-semibold">เกิดข้อผิดพลาด:</p>
+            <p id="errorText"></p>
+        </div>
+
         <div id="calendarView" class="calendar-container mb-6 fade-in">
             <div class="calendar-header p-4">
                 <div class="grid grid-cols-7 text-center font-semibold">
@@ -253,24 +279,18 @@
                 </div>
             </div>
             <div id="calendarDays" class="grid grid-cols-7 p-2">
-                <!-- Calendar days will be generated here -->
-            </div>
+                </div>
         </div>
 
-        <!-- Year View (Hidden by default) -->
         <div id="yearView" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 hidden fade-in">
-            <!-- Year months will be generated here -->
-        </div>
+            </div>
 
-        <!-- Events List -->
         <div class="bg-white rounded-lg shadow-md p-4 mb-6 fade-in">
             <h3 class="text-lg font-semibold mb-3">📋 รายการกิจกรรม</h3>
             <div id="eventsList" class="space-y-3">
-                <!-- Events will be listed here -->
-            </div>
+                </div>
         </div>
 
-        <!-- Event Details Modal -->
         <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
             <div class="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4 fade-in">
                 <div class="flex justify-between items-center mb-4">
@@ -282,15 +302,13 @@
                     </button>
                 </div>
                 <div id="modalContent" class="space-y-3">
-                    <!-- Event details will be shown here -->
-                </div>
+                    </div>
                 <div class="mt-6 flex justify-end">
                     <button id="closeModalBtn" class="btn-outline px-4 py-2 rounded-lg">ปิด</button>
                 </div>
             </div>
         </div>
 
-        <!-- Footer -->
         <footer class="text-center text-gray-500 text-sm mt-8 fade-in">
             <p>© 2025 โรงเรียนหางดงรัฐราษฎร์อุปถัมภ์ - กลุ่มงานบุคคล</p>
         </footer>
@@ -298,14 +316,19 @@
 
     <script>
         // Global variables
-        let allEvents = [];
-        let currentDate = new Date();
-        let currentView = 'month';
-        const SHEET_ID = '1vMfGpLQc-Iu7O3JGkGXuzlZf0AXEQWv4fX7YOFbHA1E';
-        const SHEET_NAME = '68';
+        let allEvents = []; // Stores all events
+        let currentDate = new Date(); // Current date displayed in the calendar
+        let currentView = 'month'; // Current view: 'month' or 'year'
+        
+        // **IMPORTANT:** Replace this URL with the URL of your Web App deployed from your Google Apps Script.
+        // Example: 'https://script.google.com/macros/s/YOUR_DEPLOYED_WEB_APP_ID/exec'
         const API_URL = 'https://script.google.com/macros/s/AKfycbz9j_keDQjuL2wcYnJVJhAEYE6tKmVeWVwHsb5mE_o5MoN1f_Mot3LDLACnAmR-uvEmGg/exec';
         
-        // DOM elements
+        // Sheet ID and Sheet Name to fetch data from
+        const SHEET_ID = '1vMfGpLQc-Iu7O3JGkGXuzlZf0AXEQWv4fX7YOFbHA1E';
+        const SHEET_NAME = '68';
+        
+        // DOM element references
         const monthViewBtn = document.getElementById('monthViewBtn');
         const yearViewBtn = document.getElementById('yearViewBtn');
         const calendarView = document.getElementById('calendarView');
@@ -325,21 +348,39 @@
         const closeModal = document.getElementById('closeModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const modalContent = document.getElementById('modalContent');
-        
+        const errorMessageDiv = document.getElementById('errorMessage'); 
+        const errorText = document.getElementById('errorText'); 
+
         // Thai month names
         const thaiMonths = [
             'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
             'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
         ];
-        
-        // Initialize the app
-        function init() {
-            fetchEvents();
-            setupEventListeners();
-            updateCalendarTitle();
+
+        // Function to determine color based on department
+        function getDepartmentColor(department) {
+            const departmentColors = {
+                'กลุ่มงานวิชาการ': '#000000', // Black
+                'กลุ่มงานงบประมาณ': '#008000', // Green
+                'กลุ่มงานบุคคล': '#800080', // Purple
+                'กลุ่มงานบริหารทั่วไป': '#FFA500', // Orange
+                'กลุ่มงานกิจการ': '#0000FF' // Blue (Updated from 'กลุ่มบริหารกิจการนักเรียน')
+            };
+            // Trim whitespace from the department string before looking up the color
+            const trimmedDepartment = department ? department.trim() : '';
+            const color = departmentColors[trimmedDepartment] || '#ff6b6b'; 
+            console.log(`Department (original): "${department}", Department (trimmed): "${trimmedDepartment}" -> Color: ${color}`); // Log both original and trimmed
+            return color;
         }
         
-        // Set up event listeners
+        // Initialize the application
+        function init() {
+            fetchEvents(); // Fetch event data
+            setupEventListeners(); // Set up event listeners
+            updateCalendarTitle(); // Update calendar title
+        }
+        
+        // Set up various event listeners
         function setupEventListeners() {
             monthViewBtn.addEventListener('click', () => switchView('month'));
             yearViewBtn.addEventListener('click', () => switchView('year'));
@@ -350,14 +391,14 @@
             closeModal.addEventListener('click', hideModal);
             closeModalBtn.addEventListener('click', hideModal);
             
-            // Close modal when clicking outside
+            // Hide modal when clicking outside the modal area
             window.addEventListener('click', (e) => {
                 if (e.target === eventModal) {
                     hideModal();
                 }
             });
             
-            // Add event listener for Enter key in title filter
+            // Add Event Listener for Enter key in search input
             titleFilter.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     filterEvents();
@@ -365,7 +406,7 @@
             });
         }
         
-        // Switch between month and year views
+        // Switch view between month and year
         function switchView(view) {
             currentView = view;
             
@@ -390,7 +431,7 @@
             updateCalendarTitle();
         }
         
-        // Update the calendar title based on current view and date
+        // Update calendar title based on view and current date
         function updateCalendarTitle() {
             if (currentView === 'month') {
                 currentPeriod.textContent = `${thaiMonths[currentDate.getMonth()]} ${currentDate.getFullYear() + 543}`;
@@ -423,39 +464,52 @@
             updateCalendarTitle();
         }
         
-        // Fetch events from Google Sheets
+        // Fetch event data from Google Sheets
         function fetchEvents() {
-            showLoading(true);
+            showLoading(true); // Show loading status
+            hideErrorMessage(); // Hide error message before loading new data
             
             fetch(`${API_URL}?sheetId=${SHEET_ID}&sheetName=${SHEET_NAME}`)
-                .then(response => response.json())
-                .then(data => {
-                    allEvents = processEvents(data);
-                    populateFilters();
-                    if (currentView === 'month') {
-                        renderMonthCalendar();
-                    } else {
-                        renderYearCalendar();
+                .then(response => {
+                    if (!response.ok) {
+                        // If response is not OK (e.g., 404, 500), throw an error
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    renderEventsList();
-                    showLoading(false);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Raw data received from Google Apps Script:', data);
+                    if (data.error) {
+                        // If there's an 'error' field in the returned data (from Google Apps Script)
+                        throw new Error(data.error);
+                    }
+                    allEvents = processEvents(data); // Process event data
+                    populateFilters(); // Populate filter dropdowns
+                    if (currentView === 'month') {
+                        renderMonthCalendar(); // Render month calendar
+                    } else {
+                        renderYearCalendar(); // Render year calendar
+                    }
+                    renderEventsList(); // Render event list
+                    showLoading(false); // Hide loading status
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
-                    showLoading(false);
-                    alert('เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง');
+                    showLoading(false); // Hide loading status
+                    showErrorMessage(`เกิดข้อผิดพลาดในการโหลดข้อมูล: ${error.message || error} กรุณาลองใหม่อีกครั้ง หรือตรวจสอบ URL ของ Google Apps Script`);
                 });
         }
         
-        // Process events data from API
+        // Process event data received from the API
         function processEvents(data) {
             return data.map(item => {
+                console.log('Processing item:', item);
                 // Process all fields from the sheet
                 const startDate = parseDate(item['วันที่เริ่มต้น']);
                 const endDate = item['วันที่สิ้นสุด'] ? parseDate(item['วันที่สิ้นสุด']) : startDate;
                 
-                return {
-                    id: item.id || generateId(),
+                const processedItem = {
+                    id: item.id || generateId(), // Use ID from GS or generate new
                     title: item['กิจกรรม'] || 'ไม่ระบุชื่อกิจกรรม',
                     startDate: startDate,
                     endDate: endDate,
@@ -465,22 +519,27 @@
                     person: item['ผู้รับผิดชอบ'] || '',
                     details: item['รายละเอียด'] || '',
                     additionalInfo: item['ข้อมูลเพิ่มเติม'] || '',
-                    color: getRandomColor()
+                    color: getDepartmentColor(item['กลุ่มงาน']) // Assign color based on department
                 };
-            }).filter(event => event.startDate); // Filter out events with invalid dates
+                console.log('Processed item:', processedItem);
+                return processedItem;
+            }).filter(event => event.startDate); // Filter out events without a valid start date
         }
         
-        // Parse date string to Date object
+        // Convert date string to Date object
         function parseDate(dateStr) {
             if (!dateStr) return null;
             
-            // Try different date formats
+            // Try various date formats
             const formats = [
                 // DD/MM/YYYY
                 str => {
                     const parts = str.split('/');
                     if (parts.length === 3) {
-                        return new Date(parts[2], parts[1] - 1, parts[0]);
+                        // Adjust year for B.E. (if B.E. > 2500, subtract 543)
+                        let year = parseInt(parts[2]);
+                        if (year > 2500) year -= 543; 
+                        return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
                     }
                     return null;
                 },
@@ -488,7 +547,9 @@
                 str => {
                     const parts = str.split('-');
                     if (parts.length === 3) {
-                        return new Date(parts[0], parts[1] - 1, parts[2]);
+                        let year = parseInt(parts[0]);
+                        if (year > 2500) year -= 543;
+                        return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[2]));
                     }
                     return null;
                 },
@@ -496,7 +557,19 @@
                 str => {
                     const parts = str.split('/');
                     if (parts.length === 3) {
-                        return new Date(parts[2], parts[0] - 1, parts[1]);
+                        let year = parseInt(parts[2]);
+                        if (year > 2500) year -= 543;
+                        return new Date(year, parseInt(parts[0]) - 1, parseInt(parts[1]));
+                    }
+                    return null;
+                },
+                 // DD-MM-YYYY
+                 str => {
+                    const parts = str.split('-');
+                    if (parts.length === 3) {
+                        let year = parseInt(parts[2]);
+                        if (year > 2500) year -= 543;
+                        return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
                     }
                     return null;
                 }
@@ -509,28 +582,19 @@
                 }
             }
             
-            // If all else fails, try native Date parsing
+            // If unable to convert with defined formats, try normal Date parsing
             const date = new Date(dateStr);
             return !isNaN(date.getTime()) ? date : null;
         }
         
-        // Generate a random ID
+        // Generate random ID
         function generateId() {
             return Math.random().toString(36).substring(2, 15);
         }
         
-        // Get a random color for events
-        function getRandomColor() {
-            const colors = [
-                '#ff6b6b', '#ff8e8e', '#ffb8b8', '#ff9999', '#ff7777',
-                '#ff5252', '#ff4040', '#ff3333', '#ff2525', '#ff1a1a'
-            ];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-        
         // Populate filter dropdowns
         function populateFilters() {
-            // Clear existing options except the first one
+            // Clear existing options, except the first one ("All")
             personFilter.innerHTML = '<option value="">ทั้งหมด</option>';
             departmentFilter.innerHTML = '<option value="">ทั้งหมด</option>';
             
@@ -538,7 +602,7 @@
             const persons = [...new Set(allEvents.map(event => event.person).filter(Boolean))];
             const departments = [...new Set(allEvents.map(event => event.department).filter(Boolean))];
             
-            // Add options to dropdowns
+            // Add options to dropdown
             persons.forEach(person => {
                 const option = document.createElement('option');
                 option.value = person;
@@ -580,42 +644,44 @@
                 );
             }
             
-            renderEventsList(filteredEvents);
+            renderEventsList(filteredEvents); // Display filtered event list
             
             if (currentView === 'month') {
-                renderMonthCalendar(filteredEvents);
+                renderMonthCalendar(filteredEvents); // Display filtered month calendar
             } else {
-                renderYearCalendar(filteredEvents);
+                renderYearCalendar(filteredEvents); // Display filtered year calendar
             }
         }
         
-        // Render month calendar
+        // Display month calendar
         function renderMonthCalendar(events = allEvents) {
-            calendarDays.innerHTML = '';
+            calendarDays.innerHTML = ''; // Clear existing calendar days
             
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
             
-            // Get the first day of the month
+            // Find the first and last day of the month
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
             
-            // Get the day of the week for the first day (0 = Sunday, 6 = Saturday)
+            // Find the day of the week for the 1st (0 = Sunday, 6 = Saturday)
             let firstDayOfWeek = firstDay.getDay();
             
-            // Create empty cells for days before the first day of the month
+            // Create empty cells for days before the 1st of the month
             for (let i = 0; i < firstDayOfWeek; i++) {
                 const dayCell = document.createElement('div');
                 dayCell.className = 'calendar-day p-2 border border-gray-100';
                 calendarDays.appendChild(dayCell);
             }
             
-            // Create cells for each day of the month
+            // Create cells for each day in the month
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const date = new Date(year, month, day);
+                // Filter events occurring on this day
                 const dayEvents = events.filter(event => {
                     const eventStart = new Date(event.startDate);
                     const eventEnd = new Date(event.endDate);
+                    // Check if the current date is between the event's start and end dates
                     return date >= new Date(eventStart.setHours(0,0,0,0)) && 
                            date <= new Date(eventEnd.setHours(23,59,59,999));
                 });
@@ -644,19 +710,19 @@
                 
                 // Add event indicators
                 if (dayEvents.length > 0) {
-                    const eventsList = document.createElement('div');
-                    eventsList.className = 'space-y-1 mt-1';
+                    const eventsListForDay = document.createElement('div');
+                    eventsListForDay.className = 'space-y-1 mt-1';
                     
-                    // Show up to 2 events, then show a "more" indicator
+                    // Display up to 2 events, then a "more" indicator
                     const displayEvents = dayEvents.slice(0, 2);
                     displayEvents.forEach(event => {
                         const eventItem = document.createElement('div');
                         eventItem.className = 'text-xs truncate cursor-pointer hover:font-semibold';
-                        eventItem.style.borderLeft = `3px solid ${event.color}`;
+                        eventItem.style.borderLeft = `3px solid ${event.color}`; // Use department color
                         eventItem.style.paddingLeft = '4px';
-                        eventItem.textContent = event.title;
+                        eventItem.textContent = event.title; // Display event title
                         eventItem.addEventListener('click', () => showEventDetails(event));
-                        eventsList.appendChild(eventItem);
+                        eventsListForDay.appendChild(eventItem);
                     });
                     
                     if (dayEvents.length > 2) {
@@ -664,26 +730,26 @@
                         moreIndicator.className = 'text-xs text-center text-gray-500 cursor-pointer hover:underline';
                         moreIndicator.textContent = `+ อีก ${dayEvents.length - 2} กิจกรรม`;
                         moreIndicator.addEventListener('click', () => {
-                            // Filter events list to show only events for this day
+                            // Filter event list to show only today's events
                             renderEventsList(dayEvents);
                         });
-                        eventsList.appendChild(moreIndicator);
+                        eventsListForDay.appendChild(moreIndicator);
                     }
                     
-                    dayCell.appendChild(eventsList);
+                    dayCell.appendChild(eventsListForDay);
                 }
                 
                 calendarDays.appendChild(dayCell);
             }
         }
         
-        // Render year calendar
+        // Display year calendar
         function renderYearCalendar(events = allEvents) {
-            yearView.innerHTML = '';
+            yearView.innerHTML = ''; // Clear existing months
             
             const year = currentDate.getFullYear();
             
-            // Create a mini calendar for each month
+            // Create mini-calendar for each month
             for (let month = 0; month < 12; month++) {
                 const monthContainer = document.createElement('div');
                 monthContainer.className = 'bg-white rounded-lg shadow-sm p-3 fade-in';
@@ -693,7 +759,7 @@
                 monthHeader.textContent = thaiMonths[month];
                 monthContainer.appendChild(monthHeader);
                 
-                // Create mini calendar grid
+                // Create mini-calendar grid
                 const calendarGrid = document.createElement('div');
                 calendarGrid.className = 'grid grid-cols-7 gap-1 text-center text-xs';
                 
@@ -706,12 +772,12 @@
                     calendarGrid.appendChild(dayHeader);
                 });
                 
-                // Get first day of the month
+                // Find the 1st day of the month
                 const firstDay = new Date(year, month, 1);
                 const lastDay = new Date(year, month + 1, 0);
                 const firstDayOfWeek = firstDay.getDay();
                 
-                // Add empty cells for days before the first day
+                // Add empty cells for days before the 1st
                 for (let i = 0; i < firstDayOfWeek; i++) {
                     const emptyCell = document.createElement('div');
                     calendarGrid.appendChild(emptyCell);
@@ -720,6 +786,7 @@
                 // Add cells for each day
                 for (let day = 1; day <= lastDay.getDate(); day++) {
                     const date = new Date(year, month, day);
+                    // Filter events occurring on this day
                     const dayEvents = events.filter(event => {
                         const eventStart = new Date(event.startDate);
                         const eventEnd = new Date(event.endDate);
@@ -733,7 +800,7 @@
                     
                     if (dayEvents.length > 0) {
                         dayCell.addEventListener('click', () => {
-                            // Set current date to this day and switch to month view
+                            // Set current date to today and switch to month view
                             currentDate = new Date(year, month, day);
                             switchView('month');
                         });
@@ -761,9 +828,9 @@
             }
         }
         
-        // Render events list
+        // Display event list
         function renderEventsList(events = allEvents) {
-            eventsList.innerHTML = '';
+            eventsList.innerHTML = ''; // Clear existing event list
             
             if (events.length === 0) {
                 const noEvents = document.createElement('div');
@@ -807,7 +874,8 @@
                     
                     const eventTitle = document.createElement('h5');
                     eventTitle.className = 'font-semibold';
-                    eventTitle.textContent = event.title;
+                    eventTitle.textContent = event.title; // Display event title
+                    eventTitle.style.color = event.color; // Set color for event title
                     
                     const eventDate = document.createElement('div');
                     eventDate.className = 'text-sm text-gray-500';
@@ -833,15 +901,16 @@
                         
                         if (event.department) {
                             const deptSpan = document.createElement('span');
-                            deptSpan.className = 'text-red-500 mr-2';
-                            deptSpan.textContent = `${event.department}`;
+                            deptSpan.className = 'text-red-500 mr-2'; 
+                            deptSpan.textContent = `${event.department}`; // Display department
+                            deptSpan.style.color = event.color; // Set color for department
                             eventInfo.appendChild(deptSpan);
                         }
                         
                         if (event.person) {
                             const personSpan = document.createElement('span');
                             personSpan.className = 'text-gray-600';
-                            personSpan.textContent = `👤 ${event.person}`;
+                            personSpan.textContent = `👤 ${event.person}`; // Display person in charge
                             eventInfo.appendChild(personSpan);
                         }
                         
@@ -855,12 +924,13 @@
         
         // Show event details in modal
         function showEventDetails(event) {
-            modalContent.innerHTML = '';
+            modalContent.innerHTML = ''; // Clear existing modal content
             
             // Event title
             const title = document.createElement('h3');
             title.className = 'text-xl font-semibold mb-3';
             title.textContent = event.title;
+            title.style.color = event.color; // Set color for event title in modal
             modalContent.appendChild(title);
             
             // Event start date
@@ -888,7 +958,7 @@
             startDateContainer.appendChild(startDateText);
             modalContent.appendChild(startDateContainer);
             
-            // Event end date
+            // Event end date (if exists and not the same day as start date)
             if (event.endDate && event.startDate.toDateString() !== event.endDate.toDateString()) {
                 const endDateContainer = document.createElement('div');
                 endDateContainer.className = 'flex items-start mb-3';
@@ -968,7 +1038,7 @@
                 modalContent.appendChild(locationContainer);
             }
             
-            // Event department
+            // Related department
             if (event.department) {
                 const deptContainer = document.createElement('div');
                 deptContainer.className = 'flex items-start mb-3';
@@ -987,6 +1057,7 @@
                 
                 const deptText = document.createElement('div');
                 deptText.textContent = event.department;
+                deptText.style.color = event.color; // Set color for department in modal
                 
                 deptContainer.appendChild(deptIcon);
                 deptContainer.appendChild(deptLabel);
@@ -994,7 +1065,7 @@
                 modalContent.appendChild(deptContainer);
             }
             
-            // Event person
+            // Person in charge
             if (event.person) {
                 const personContainer = document.createElement('div');
                 personContainer.className = 'flex items-start mb-3';
@@ -1056,7 +1127,7 @@
                 modalContent.appendChild(additionalContainer);
             }
             
-            eventModal.classList.remove('hidden');
+            eventModal.classList.remove('hidden'); // Show modal
         }
         
         // Hide event details modal
@@ -1064,7 +1135,7 @@
             eventModal.classList.add('hidden');
         }
         
-        // Show/hide loading indicator
+        // Show/hide loading status
         function showLoading(show) {
             if (show) {
                 loadingIndicator.classList.remove('hidden');
@@ -1072,8 +1143,20 @@
                 loadingIndicator.classList.add('hidden');
             }
         }
+
+        // Show error message
+        function showErrorMessage(message) {
+            errorText.textContent = message;
+            errorMessageDiv.classList.remove('hidden');
+        }
+
+        // Hide error message
+        function hideErrorMessage() {
+            errorMessageDiv.classList.add('hidden');
+            errorText.textContent = '';
+        }
         
-        // Format date to string
+        // Format date to string (not currently used, but kept for future use)
         function formatDate(date) {
             if (!date) return '';
             return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
@@ -1082,5 +1165,5 @@
         // Initialize the app when the page loads
         window.addEventListener('DOMContentLoaded', init);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'948bfae8727045c3',t:'MTc0ODc1MjI3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
