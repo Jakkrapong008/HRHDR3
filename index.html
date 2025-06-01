@@ -495,8 +495,6 @@
         // Process event data received from the API
         function processEvents(data) {
             return data.map(item => {
-                console.log('Processing item:', item);
-                // Process all fields from the sheet
                 const startDate = parseDate(item['วันที่เริ่มต้น']);
                 const endDate = item['วันที่สิ้นสุด'] ? parseDate(item['วันที่สิ้นสุด']) : startDate;
                 
@@ -513,7 +511,23 @@
                     additionalInfo: item['ข้อมูลเพิ่มเติม'] || '',
                     color: getDepartmentColor(item['กลุ่มงาน']) // Assign color based on department
                 };
-                console.log('Processed item:', processedItem);
+                
+                // Add more explicit logging for the Date objects' local values
+                console.log(`--- Processed event "${processedItem.title}" ---`);
+                if (processedItem.startDate) {
+                    console.log(`  Original Date String: "${item['วันที่เริ่มต้น']}"`);
+                    console.log(`  Parsed Start Date (Local Time): ${processedItem.startDate.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}`);
+                    console.log(`  Parsed Start Date (Full Object String): ${processedItem.startDate.toString()}`);
+                    console.log(`  Parsed Start Date (ISO UTC Representation from object): ${processedItem.startDate.toISOString()}`);
+                }
+                if (processedItem.endDate && processedItem.startDate.toDateString() !== processedItem.endDate.toDateString()) {
+                    console.log(`  Original End Date String: "${item['วันที่สิ้นสุด']}"`);
+                    console.log(`  Parsed End Date (Local Time): ${processedItem.endDate.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}`);
+                    console.log(`  Parsed End Date (Full Object String): ${processedItem.endDate.toString()}`);
+                    console.log(`  Parsed End Date (ISO UTC Representation from object): ${processedItem.endDate.toISOString()}`);
+                }
+                console.log(`----------------------------------`);
+                
                 return processedItem;
             }).filter(event => event.startDate); // Filter out events without a valid start date
         }
@@ -521,27 +535,59 @@
         // Convert date string to Date object
         function parseDate(dateStr) {
             if (!dateStr) return null;
-            
-            // Try various date formats
+
+            console.log(`Attempting to parse date string: "${dateStr}"`);
+
+            // 1. Handle ISO 8601 strings with time and timezone (e.g., "2025-06-01T17:00:00.000Z")
+            // This is the most common cause of off-by-one errors due to UTC to local conversion.
+            // We create a Date object from the UTC string, then extract its LOCAL date components
+            // to create a new Date object representing midnight of that local date.
+            const isoDateTimeMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+            if (isoDateTimeMatch) {
+                const utcDate = new Date(dateStr); // Interpret as UTC
+                // Get local date components from the UTC date object
+                const year = utcDate.getFullYear();
+                const month = utcDate.getMonth();
+                const day = utcDate.getDate();
+                const localDate = new Date(year, month, day); // Create a new local date at midnight
+                console.log(`  -> ISO (UTC to Local) match: Original: "${dateStr}". UTC Date object: ${utcDate.toString()}. Created local Date object: ${localDate.toString()} (ISO UTC representation: ${localDate.toISOString()})`);
+                return localDate;
+            }
+
+            // 2. Handle YYYY-MM-DD strings (without time or Z, which Date constructor treats as local)
+            const ymdMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (ymdMatch) {
+                const year = parseInt(ymdMatch[1]);
+                const month = parseInt(ymdMatch[2]) - 1;
+                const day = parseInt(ymdMatch[3]);
+                const localDate = new Date(year, month, day);
+                console.log(`  -> YYYY-MM-DD match: Original: "${dateStr}". Created local Date object: ${localDate.toString()}`);
+                return localDate;
+            }
+
+            // 3. Fallback to other known formats (DD/MM/YYYY, etc.)
             const formats = [
                 // DD/MM/YYYY
                 str => {
                     const parts = str.split('/');
                     if (parts.length === 3) {
-                        // Adjust year for B.E. (if B.E. > 2500, subtract 543)
                         let year = parseInt(parts[2]);
-                        if (year > 2500) year -= 543; 
-                        return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
+                        if (year > 2500) year -= 543; // Adjust for B.E.
+                        const d = new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
+                        console.log(`  -> DD/MM/YYYY match: ${d.toString()}`);
+                        return d;
                     }
                     return null;
                 },
-                // YYYY-MM-DD
+                // DD-MM-YYYY
                 str => {
                     const parts = str.split('-');
                     if (parts.length === 3) {
-                        let year = parseInt(parts[0]);
+                        let year = parseInt(parts[2]);
                         if (year > 2500) year -= 543;
-                        return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[2]));
+                        const d = new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
+                        console.log(`  -> DD-MM-YYYY match: ${d.toString()}`);
+                        return d;
                     }
                     return null;
                 },
@@ -551,17 +597,9 @@
                     if (parts.length === 3) {
                         let year = parseInt(parts[2]);
                         if (year > 2500) year -= 543;
-                        return new Date(year, parseInt(parts[0]) - 1, parseInt(parts[1]));
-                    }
-                    return null;
-                },
-                 // DD-MM-YYYY
-                 str => {
-                    const parts = str.split('-');
-                    if (parts.length === 3) {
-                        let year = parseInt(parts[2]);
-                        if (year > 2500) year -= 543;
-                        return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
+                        const d = new Date(year, parseInt(parts[0]) - 1, parseInt(parts[1]));
+                        console.log(`  -> MM/DD/YYYY match: ${d.toString()}`);
+                        return d;
                     }
                     return null;
                 }
@@ -574,8 +612,9 @@
                 }
             }
             
-            // If unable to convert with defined formats, try normal Date parsing
+            // 4. Final fallback for any other string Date can parse.
             const date = new Date(dateStr);
+            console.log(`  -> Fallback parse: ${date.toString()}`);
             return !isNaN(date.getTime()) ? date : null;
         }
         
@@ -691,11 +730,16 @@
                 const date = new Date(year, month, day);
                 // Filter events occurring on this day
                 const dayEvents = events.filter(event => {
-                    const eventStart = new Date(event.startDate);
-                    const eventEnd = new Date(event.endDate);
-                    // Check if the current date is between the event's start and end dates
-                    return date >= new Date(eventStart.setHours(0,0,0,0)) && 
-                           date <= new Date(eventEnd.setHours(23,59,59,999));
+                    const eventStart = event.startDate; // Already a local Date object
+                    const eventEnd = event.endDate; // Already a local Date object
+
+                    // Compare only the date parts (year, month, day)
+                    // Ensure that the 'date' (calendar cell date) falls within the event's start and end dates (inclusive)
+                    const normalizedEventStart = new Date(eventStart.getFullYear(), eventStart.getMonth(), eventStart.getDate());
+                    const normalizedEventEnd = new Date(eventEnd.getFullYear(), eventEnd.getMonth(), eventEnd.getDate());
+                    const normalizedCurrentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+                    return (normalizedCurrentDate >= normalizedEventStart && normalizedCurrentDate <= normalizedEventEnd);
                 });
                 
                 const dayCell = document.createElement('div');
@@ -800,10 +844,15 @@
                     const date = new Date(year, month, day);
                     // Filter events occurring on this day
                     const dayEvents = events.filter(event => {
-                        const eventStart = new Date(event.startDate);
-                        const eventEnd = new Date(event.endDate);
-                        return date >= new Date(eventStart.setHours(0,0,0,0)) && 
-                               date <= new Date(eventEnd.setHours(23,59,59,999));
+                        const eventStart = event.startDate; // Already a local Date object
+                        const eventEnd = event.endDate; // Already a local Date object
+
+                        // Compare only the date parts (year, month, day)
+                        const normalizedEventStart = new Date(eventStart.getFullYear(), eventStart.getMonth(), eventStart.getDate());
+                        const normalizedEventEnd = new Date(eventEnd.getFullYear(), eventEnd.getMonth(), eventEnd.getDate());
+                        const normalizedCurrentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+                        return (normalizedCurrentDate >= normalizedEventStart && normalizedCurrentDate <= normalizedEventEnd);
                     });
                     
                     const dayCell = document.createElement('div');
@@ -858,7 +907,7 @@
             // Group events by month
             const eventsByMonth = {};
             sortedEvents.forEach(event => {
-                const date = new Date(event.startDate);
+                const date = event.startDate; // Already a local Date object
                 const monthYear = `${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
                 
                 if (!eventsByMonth[monthYear]) {
@@ -892,11 +941,11 @@
                     const eventDate = document.createElement('div');
                     eventDate.className = 'text-sm text-gray-500';
                     
-                    const startDate = new Date(event.startDate);
+                    const startDate = event.startDate; // Already a local Date object
                     const formattedStartDate = `${startDate.getDate()} ${thaiMonths[startDate.getMonth()]} ${startDate.getFullYear() + 543}`;
                     
-                    if (event.endDate && event.startDate.toDateString() !== event.endDate.toDateString()) {
-                        const endDate = new Date(event.endDate);
+                    if (event.endDate && startDate.toDateString() !== event.endDate.toDateString()) {
+                        const endDate = event.endDate; // Already a local Date object
                         const formattedEndDate = `${endDate.getDate()} ${thaiMonths[endDate.getMonth()]} ${endDate.getFullYear() + 543}`;
                         eventDate.textContent = `${formattedStartDate} - ${formattedEndDate}`;
                     } else {
@@ -962,7 +1011,7 @@
             startDateLabel.textContent = 'วันที่เริ่มต้น:';
             
             const startDateText = document.createElement('div');
-            const startDate = new Date(event.startDate);
+            const startDate = event.startDate; // Already a local Date object
             startDateText.textContent = `${startDate.getDate()} ${thaiMonths[startDate.getMonth()]} ${startDate.getFullYear() + 543}`;
             
             startDateContainer.appendChild(startDateIcon);
@@ -988,7 +1037,7 @@
                 endDateLabel.textContent = 'วันที่สิ้นสุด:';
                 
                 const endDateText = document.createElement('div');
-                const endDate = new Date(event.endDate);
+                const endDate = event.endDate; // Already a local Date object
                 endDateText.textContent = `${endDate.getDate()} ${thaiMonths[endDate.getMonth()]} ${endDate.getFullYear() + 543}`;
                 
                 endDateContainer.appendChild(endDateIcon);
