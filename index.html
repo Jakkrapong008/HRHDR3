@@ -364,7 +364,7 @@
                 'กลุ่มงานงบประมาณ': '#008000', // Green
                 'กลุ่มงานบุคคล': '#800080', // Purple
                 'กลุ่มงานบริหารทั่วไป': '#FFA500', // Orange
-                'กลุ่มงานกิจการ': '#0000FF' // Blue (Updated from 'กลุ่มบริหารกิจการนักเรียน')
+                'กลุ่มงานกิจการ': '#0000FF' // Blue
             };
             // Trim whitespace from the department string before looking up the color
             const trimmedDepartment = department ? department.trim() : '';
@@ -417,7 +417,6 @@
                 yearViewBtn.classList.add('btn-outline');
                 calendarView.classList.remove('hidden');
                 yearView.classList.add('hidden');
-                renderMonthCalendar();
             } else {
                 yearViewBtn.classList.add('tab-active');
                 yearViewBtn.classList.remove('btn-outline');
@@ -425,10 +424,10 @@
                 monthViewBtn.classList.add('btn-outline');
                 calendarView.classList.add('hidden');
                 yearView.classList.remove('hidden');
-                renderYearCalendar();
             }
             
             updateCalendarTitle();
+            filterEvents(); // Call filterEvents to apply filters for the new view
         }
         
         // Update calendar title based on view and current date
@@ -444,24 +443,22 @@
         function navigatePrevious() {
             if (currentView === 'month') {
                 currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-                renderMonthCalendar();
             } else {
                 currentDate = new Date(currentDate.getFullYear() - 1, 0, 1);
-                renderYearCalendar();
             }
             updateCalendarTitle();
+            filterEvents(); // Call filterEvents to re-render with new month/year
         }
         
         // Navigate to next month/year
         function navigateNext() {
             if (currentView === 'month') {
                 currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-                renderMonthCalendar();
             } else {
                 currentDate = new Date(currentDate.getFullYear() + 1, 0, 1);
-                renderYearCalendar();
             }
             updateCalendarTitle();
+            filterEvents(); // Call filterEvents to re-render with new month/year
         }
         
         // Fetch event data from Google Sheets
@@ -485,12 +482,7 @@
                     }
                     allEvents = processEvents(data); // Process event data
                     populateFilters(); // Populate filter dropdowns
-                    if (currentView === 'month') {
-                        renderMonthCalendar(); // Render month calendar
-                    } else {
-                        renderYearCalendar(); // Render year calendar
-                    }
-                    renderEventsList(); // Render event list
+                    filterEvents(); // Call filterEvents to render initial view with all filters applied
                     showLoading(false); // Hide loading status
                 })
                 .catch(error => {
@@ -618,7 +610,7 @@
             });
         }
         
-        // Filter events based on search criteria
+        // Filter events based on search criteria and current month/year
         function filterEvents() {
             const title = titleFilter.value.toLowerCase();
             const person = personFilter.value;
@@ -642,6 +634,26 @@
                 filteredEvents = filteredEvents.filter(event => 
                     event.department && event.department.includes(department)
                 );
+            }
+
+            // Apply month filter if in month view
+            if (currentView === 'month') {
+                const currentMonth = currentDate.getMonth();
+                const currentYear = currentDate.getFullYear();
+                filteredEvents = filteredEvents.filter(event => {
+                    const eventStart = event.startDate;
+                    const eventEnd = event.endDate;
+
+                    // Check if the event starts in the current month/year
+                    const startsInCurrentMonth = (eventStart.getFullYear() === currentYear && eventStart.getMonth() === currentMonth);
+                    // Check if the event ends in the current month/year
+                    const endsInCurrentMonth = (eventEnd.getFullYear() === currentYear && eventEnd.getMonth() === currentMonth);
+                    // Check if the event spans across the current month
+                    const spansCurrentMonth = (eventStart.getFullYear() < currentYear || (eventStart.getFullYear() === currentYear && eventStart.getMonth() < currentMonth)) &&
+                                              (eventEnd.getFullYear() > currentYear || (eventEnd.getFullYear() === currentYear && eventEnd.getMonth() > currentMonth));
+
+                    return startsInCurrentMonth || endsInCurrentMonth || spansCurrentMonth;
+                });
             }
             
             renderEventsList(filteredEvents); // Display filtered event list
